@@ -19,10 +19,8 @@ class AuthController extends Controller
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
-        // 登入用戶並創建 token
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(['message' => 'User registered successfully', 'token' => $token], 201);
+        $access_token = JWTAuth::fromUser($user);
+        return parent::responseSuccess(['access_token' => $access_token]);
     }
 
 

@@ -22,7 +22,7 @@ class Controller extends BaseController
         ], $code);
     }
 
-    public function responseSuccess($data = null)
+    public function responseSuccess($data = null, $message = '')
     {
         return response()->json([
             'code' => 200,

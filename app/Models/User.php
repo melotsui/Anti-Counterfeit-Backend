@@ -12,6 +12,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject {
 
     use HasApiTokens, HasFactory, Notifiable;
+    protected $primaryKey = 'user_id';
 
     public function getJWTIdentifier() {
         return $this->getKey();
@@ -26,7 +27,6 @@ class User extends Authenticatable implements JWTSubject {
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
     ];

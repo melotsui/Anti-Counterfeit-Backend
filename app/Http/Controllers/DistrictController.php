@@ -2,18 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
+use App\Models\District;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
-class UserController extends Controller
+class DistrictController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
     public function index()
+    {
+        $user = auth()->user();
+
+        $districts = District::all();
+        return parent::responseSuccess(['districts' => $districts]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
         //
     }
@@ -23,26 +32,21 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-
-        $user = new User();
-        $user->email = $request->input('email');
-        $user->password = Hash::make($request->input('password'));
-
-        $user->save();
-
-        // 生成 JWT token
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json([
-            'message' => 'User created successfully',
-            'token' => $token
-        ], 201);
+        //
     }
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
     {
         //
     }
