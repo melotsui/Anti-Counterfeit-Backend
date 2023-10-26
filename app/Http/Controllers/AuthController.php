@@ -37,13 +37,19 @@ class AuthController extends Controller
         } catch (JWTException $e) {
             return parent::responseError(500, 'Server Error: Could not create access token');
         }
-        return parent::responseSuccess(['access_token' => $access_token]);
+        return parent::responseSuccess([
+            'access_token' => $access_token,
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 
 
     public function me()
     {
-        return response()->json(auth()->user());
+        if (auth()->user() != null)
+            return parent::responseSuccess(auth()->user());
+        else
+            return parent::responseError(500, null);
     }
 
     public function logout()
@@ -60,7 +66,7 @@ class AuthController extends Controller
 
     protected function createNewToken($token)
     {
-        return response()->json([
+        return parent::responseSuccess([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
