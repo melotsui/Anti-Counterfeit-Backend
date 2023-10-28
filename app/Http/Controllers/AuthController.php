@@ -39,6 +39,7 @@ class AuthController extends Controller
         }
         return parent::responseSuccess([
             'access_token' => $access_token,
+            'user' => auth()->user(),
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }

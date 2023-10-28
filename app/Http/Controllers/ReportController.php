@@ -7,6 +7,9 @@ use App\Models\ReportFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Category;
+use App\Models\District;
+use App\Models\SubDistrict;
 
 class ReportController extends Controller
 {
@@ -23,7 +26,7 @@ class ReportController extends Controller
         $data->user_id = auth()->user()->user_id;
         $report = Report::create(get_object_vars($data));
 
-        return response()->json([
+        return parent::responseSuccess([
             'message' => 'Report created successfully',
             'report' => $report,
         ], 201);
@@ -72,7 +75,7 @@ class ReportController extends Controller
         } else {
             return parent::responseError(500, 'Invalid media type');
         }
-        
+
         $user = auth()->user();
         $report_id = $request->report_id;
         if (!$report = Report::find($report_id)) {
@@ -98,6 +101,57 @@ class ReportController extends Controller
             [
                 'report' => $report,
                 'file' => $file
+            ],
+            'File uploaded successfully'
+        );
+    }
+
+    //Search
+    public function search(Request $request)
+    {
+        $reports = Report::select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name')
+            ->leftJoin('categories as c', 'reports.category_id', '=', 'c.category_id')
+            ->leftJoin('districts as d', 'reports.district_id', '=', 'd.district_id')
+            ->leftJoin('sub_districts as sd', 'reports.sub_district_id', '=', 'sd.sub_district_id')
+            ->where('report_id', '>', 0);
+        if ($request->product != null)
+            $reports = $reports->where('product', 'like', '%' . $request->product . '%');
+        if ($request->shop != null)
+            $reports = $reports->where('shop', 'like', '%' . $request->shop . '%');
+        if (
+            $request->category_id != null && $request->category_id != 0
+            && $request->category_id != '' && $request->category_id != '0'
+        )
+            $reports = $reports->where('reports.category_id', $request->category_id);
+        if (
+            $request->district_id != null && $request->district_id != 0
+            && $request->district_id != '' && $request->district_id != '0'
+        )
+            $reports = $reports->where('reports.district_id', $request->district_id);
+        if (
+            $request->sub_district_id != null && $request->sub_district_id != 0
+            && $request->sub_district_id != '' && $request->sub_district_id != '0'
+        )
+            $reports = $reports->where('reports.sub_district_id', $request->sub_district_id);
+        $reports = $reports->get();
+
+        return parent::responseSuccess(
+            [
+                'reports' => $reports,
+            ],
+            'File uploaded successfully'
+        );
+    }
+
+    //History
+    public function history(Request $request)
+    {
+        $user = auth()->user();
+        $reports = Report::where('user_id', $user->user_id)->get();
+
+        return parent::responseSuccess(
+            [
+                'reports' => $reports,
             ],
             'File uploaded successfully'
         );

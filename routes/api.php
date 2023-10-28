@@ -25,19 +25,22 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::group(['middleware' => ['jwt.auth']], function() {
-    Route::apiResources([
-        '/users' => UserController::class,
-    ]);
-    Route::resource('/reports', ReportController::class);
-});
-
 Route::resource('/categories', CategoryController::class);
 Route::resource('/districts', DistrictController::class);
 Route::resource('/sub-districts', SubDistrictController::class);
 Route::get('/sub-districts/getSubDistrictsByDistrictId/{district_id}', [SubDistrictController::class, 'getSubDistrictsByDistrictId']);
-Route::post('/reports/uploadFile', [ReportController::class, 'uploadFile']);
 
+
+Route::group(['middleware' => ['jwt.auth']], function () {
+    Route::get('/reports/history', [ReportController::class, 'history']);
+    Route::apiResources([
+        '/users' => UserController::class,
+        '/reports' => ReportController::class
+    ]);
+    Route::post('/reports/uploadFile', [ReportController::class, 'uploadFile']);
+
+});
+Route::post('/reports/search', [ReportController::class, 'search']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);
