@@ -33,7 +33,7 @@ Route::get('/reports/{report_id}', [ReportController::class, 'show']);
 
 
 Route::group(['middleware' => ['jwt.auth']], function () {
-    Route::get('/reports/history', [ReportController::class, 'history']);
+    Route::post('/reports/history', [ReportController::class, 'history']);
     Route::apiResources([
         '/users' => UserController::class,
         '/reports' => ReportController::class
