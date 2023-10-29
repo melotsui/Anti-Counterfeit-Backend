@@ -7,12 +7,16 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailVerification;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-
+        if ($user = User::find($request->input('email'))) {
+            parent::responseError(500, 'Email already exists');
+        }
         $user = new User();
         $user->email = $request->input('email');
         $user->name = $request->input('name');
@@ -20,6 +24,14 @@ class AuthController extends Controller
         $user->save();
 
         $access_token = JWTAuth::fromUser($user);
+
+        $link = 'http://localhost:4200/email-verification?token=' . $access_token;
+
+        $mail = new EmailVerification;
+        $mail->name = $user->name;
+        $mail->link = $link;
+        Mail::to($user->email)->send($mail);
+
         return parent::responseSuccess(['access_token' => $access_token]);
     }
 
@@ -36,6 +48,15 @@ class AuthController extends Controller
             }
         } catch (JWTException $e) {
             return parent::responseError(500, 'Server Error: Could not create access token');
+        }
+        $user = auth()->user();
+        if ($user->email_verified_at == null) {
+            $link = 'http://localhost:4200/email-verification?token=' . $access_token;
+
+            $mail = new EmailVerification;
+            $mail->name = $user->name;
+            $mail->link = $link;
+            Mail::to($user->email)->send($mail);
         }
         return parent::responseSuccess([
             'access_token' => $access_token,

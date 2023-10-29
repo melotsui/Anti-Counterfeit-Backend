@@ -29,6 +29,7 @@ Route::resource('/categories', CategoryController::class);
 Route::resource('/districts', DistrictController::class);
 Route::resource('/sub-districts', SubDistrictController::class);
 Route::get('/sub-districts/getSubDistrictsByDistrictId/{district_id}', [SubDistrictController::class, 'getSubDistrictsByDistrictId']);
+Route::get('/reports/{report_id}', [ReportController::class, 'show']);
 
 
 Route::group(['middleware' => ['jwt.auth']], function () {
@@ -38,6 +39,7 @@ Route::group(['middleware' => ['jwt.auth']], function () {
         '/reports' => ReportController::class
     ]);
     Route::post('/reports/uploadFile', [ReportController::class, 'uploadFile']);
+    Route::post('/users/verifyEmail', [UserController::class, 'verifyEmail']);
 
 });
 Route::post('/reports/search', [ReportController::class, 'search']);

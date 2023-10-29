@@ -62,4 +62,14 @@ class UserController extends Controller
     {
         //
     }
+
+    //Verify Email
+    public function verifyEmail(Request $request)
+    {
+        $user = auth()->user();
+        $user->email_verified_at = now();
+        $user->save();
+        $access_token = JWTAuth::fromUser($user);
+        return parent::responseSuccess(['access_token' => $access_token]);
+    }
 }

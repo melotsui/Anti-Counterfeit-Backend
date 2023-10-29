@@ -34,11 +34,19 @@ class ReportController extends Controller
 
     public function show($id)
     {
-        $report = Report::with('reportFiles')->findOrFail($id);
-
-        return response()->json([
-            'report' => $report,
-        ]);
+        if (
+            $report = Report::with('reportFiles')->select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name')
+                ->leftJoin('categories as c', 'reports.category_id', '=', 'c.category_id')
+                ->leftJoin('districts as d', 'reports.district_id', '=', 'd.district_id')
+                ->leftJoin('sub_districts as sd', 'reports.sub_district_id', '=', 'sd.sub_district_id')
+                ->where('report_id', $id)->first()
+        ) {
+            return parent::responseSuccess([
+                'report' => $report,
+            ]);
+        } else {
+            return parent::responseError(500, 'Report not found');
+        }
     }
 
     public function update(Request $request, $id)
@@ -84,15 +92,16 @@ class ReportController extends Controller
 
         try {
             $filename = Str::uuid() . '_' . $user->user_id . '_' . $report_id . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('media/report/' . $mediaType, $filename, 'local');
-
+            $path = $file->storeAs('media/report/' . $mediaType, $filename, 'public');
+            //php artisan storage:link
+            //http://127.0.0.1:8000/storage/media/report/photo/a9c13927-a243-464d-b148-6c202b171ee2_17_1.jpg
             $file = new ReportFile();
             $file->report_id = $report_id;
             $file->file_name = $filename;
             $file->file_path = $path;
             $file->save();
         } catch (\Exception $e) {
-            Storage::disk('local')->delete($path);
+            Storage::disk('public')->delete($path);
             $this->errorCode = 5007; //Fail to upload media
             $this->errorMessage = sprintf(trans('errors.' . $this->errorCode));
             return parent::responseError($this->errorCode, $this->errorMessage, $e->getMessage());
