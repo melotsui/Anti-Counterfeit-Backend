@@ -42,9 +42,7 @@ class AuthController extends Controller
 
         try {
             if (!$access_token = JWTAuth::attempt($credentials)) {
-                $this->errorCode = 400;
-                $this->errorMessage = trans('errors.' . $this->errorCode);
-                return parent::responseError($this->errorCode, $this->errorMessage);
+                return parent::responseError(404, 'Invalid email or password');
             }
         } catch (JWTException $e) {
             return parent::responseError(500, 'Server Error: Could not create access token');
