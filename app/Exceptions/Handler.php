@@ -4,6 +4,11 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -30,14 +35,46 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $exception)
     {
-        // if ($request->expectsJson()) {
+
+        if ($exception instanceof UnauthorizedHttpException) {
             return response()->json([
-                'code' => 500,
+                'code' => 401,
                 'message' => $exception->getMessage(),
                 'data' => null
-            ], 500);
-        // }
+            ], 401);
+        }
+        else if ($exception instanceof TokenExpiredException) {
+            return response()->json([
+                'code' => 401,
+                'message' => 'Token has expired',
+                'data' => null
+            ], 401);
 
+        } else if ($exception instanceof TokenInvalidException) {
+            return response()->json([
+                'code' => 401,
+                'message' => 'Token is invalid',
+                'data' => null
+            ], 401);
+        } else if ($exception instanceof TokenBlacklistedException) {
+            return response()->json([
+                'code' => 401,
+                'message' => 'The token has been blacklisted',
+                'data' => null
+            ], 401);
+        } else if ($exception instanceof JWTException) {
+            return response()->json([
+                'code' => 500,
+                'message' => 'Error fetching the token',
+                'data' => null
+            ], 500);
+        } else {
+            return response()->json([
+                'code' => 500,
+                'message' => 'Server Error: ' . $exception->getMessage(),
+                'data' => get_class($exception)
+            ], 500);
+        }
         // return parent::render($request, $exception);
     }
 }

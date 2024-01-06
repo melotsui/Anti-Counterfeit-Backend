@@ -27,9 +27,8 @@ class ReportController extends Controller
         $report = Report::create(get_object_vars($data));
 
         return parent::responseSuccess([
-            'message' => 'Report created successfully',
             'report' => $report,
-        ], 201);
+        ], 'Report created successfully');
     }
 
     public function show($id)
@@ -45,7 +44,7 @@ class ReportController extends Controller
                 'report' => $report,
             ]);
         } else {
-            return parent::responseError(500, 'Report not found');
+            return parent::responseError(404, 'Report not found');
         }
     }
 
@@ -62,12 +61,17 @@ class ReportController extends Controller
 
     public function destroy($id)
     {
-        $report = Report::findOrFail($id);
+        if(auth()->user()->user_id != 1) {
+            return parent::responseError(400, 'Access Deny');
+        }
+        if(!$report = Report::find($id)){
+            return parent::responseError(404, 'Report not found');
+        }
         $report->delete();
 
-        return response()->json([
-            'message' => 'Report deleted successfully',
-        ]);
+        return parent::responseSuccess([
+            'report' => $report,
+        ], 'Report deleted successfully');
     }
 
     //Upload file

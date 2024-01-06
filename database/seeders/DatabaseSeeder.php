@@ -15,6 +15,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         \App\Models\User::factory()->create([
+            'name' => 'admin',
+            'password' => Hash::make('admin'),
+            'email' => 'admin',
+            'email_verified_at' => Carbon::now(),
+        ]);
+
+        \App\Models\User::factory()->create([
             'name' => 'Melo Tsui',
             'password' => Hash::make('Abc123456'),
             'email' => 'qonkgonk@gmail.com',
@@ -24,7 +31,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DistrictSeeder::class,
         ]);
-        
+
         $this->call([
             CategorySeeder::class,
         ]);
