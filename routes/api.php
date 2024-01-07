@@ -30,9 +30,12 @@ Route::resource('/districts', DistrictController::class);
 Route::resource('/sub-districts', SubDistrictController::class);
 Route::get('/sub-districts/getSubDistrictsByDistrictId/{district_id}', [SubDistrictController::class, 'getSubDistrictsByDistrictId']);
 Route::get('/reports/{report_id}', [ReportController::class, 'show']);
+Route::post('/users/forgotPassword', [UserController::class, 'forgotPassword']);
+Route::post('/users/resetPassword', [UserController::class, 'resetPassword']);
 
 
 Route::group(['middleware' => ['jwt.auth']], function () {
+    Route::put('/users/editProfile', [UserController::class, 'editProfile']);
     Route::post('/reports/history', [ReportController::class, 'history']);
     Route::apiResources([
         '/users' => UserController::class,

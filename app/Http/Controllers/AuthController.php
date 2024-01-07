@@ -14,8 +14,9 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        if ($user = User::find($request->input('email'))) {
-            parent::responseError(500, 'Email already exists');
+        $email = $request->email;
+        if($user = User::where('email', $email)->first()){
+            return parent::responseError(500, 'Email already exists');
         }
         $user = new User();
         $user->email = $request->input('email');

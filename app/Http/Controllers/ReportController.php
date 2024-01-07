@@ -34,10 +34,11 @@ class ReportController extends Controller
     public function show($id)
     {
         if (
-            $report = Report::with('reportFiles')->select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name')
+            $report = Report::with('reportFiles')->select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name', 'u.name')
                 ->leftJoin('categories as c', 'reports.category_id', '=', 'c.category_id')
                 ->leftJoin('districts as d', 'reports.district_id', '=', 'd.district_id')
                 ->leftJoin('sub_districts as sd', 'reports.sub_district_id', '=', 'sd.sub_district_id')
+                ->leftJoin('users as u', 'reports.user_id', '=', 'u.user_id')
                 ->where('report_id', $id)->first()
         ) {
             return parent::responseSuccess([
@@ -122,10 +123,11 @@ class ReportController extends Controller
     //Search
     public function search(Request $request)
     {
-        $reports = Report::select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name')
+        $reports = Report::select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name', 'u.name')
             ->leftJoin('categories as c', 'reports.category_id', '=', 'c.category_id')
             ->leftJoin('districts as d', 'reports.district_id', '=', 'd.district_id')
             ->leftJoin('sub_districts as sd', 'reports.sub_district_id', '=', 'sd.sub_district_id')
+            ->leftJoin('users as u', 'reports.user_id', '=', 'u.user_id')
             ->where('report_id', '>', 0);
         if ($request->product != null)
             $reports = $reports->where('product', 'like', '%' . $request->product . '%');
@@ -146,7 +148,7 @@ class ReportController extends Controller
             && $request->sub_district_id != '' && $request->sub_district_id != '0'
         )
             $reports = $reports->where('reports.sub_district_id', $request->sub_district_id);
-        $reports = $reports->get();
+        $reports = $reports->orderBy('reports.created_at', 'desc')->get();
 
         return parent::responseSuccess(
             [
@@ -160,7 +162,11 @@ class ReportController extends Controller
     public function history(Request $request)
     {
         $user = auth()->user();
-        $reports = Report::where('user_id', $user->user_id)->get();
+        $reports = Report::select('reports.*', 'c.category_name', 'd.district_name', 'sd.sub_district_name')
+        ->leftJoin('categories as c', 'reports.category_id', '=', 'c.category_id')
+        ->leftJoin('districts as d', 'reports.district_id', '=', 'd.district_id')
+        ->leftJoin('sub_districts as sd', 'reports.sub_district_id', '=', 'sd.sub_district_id')
+        ->where('user_id', $user->user_id)->get();
 
         return parent::responseSuccess(
             [
